@@ -118,5 +118,9 @@ out
 # Backend specific
 backend/node_modules
 backend/.env
+
+# Temporary files
+cloud-run-invoker-key.json
+policy.yaml
 ../node_modules
 .env
