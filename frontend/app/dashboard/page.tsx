@@ -3,6 +3,17 @@ import Layout from '@/components/Layout';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Badge from '@/components/Badge';
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  ScaleIcon,
+  ClockIcon,
+  PlusCircleIcon,
+  CheckBadgeIcon,
+  CalendarDaysIcon,
+  CheckIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 
 
 export default function DashboardPage() {

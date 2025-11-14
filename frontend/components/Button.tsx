@@ -1,19 +1,23 @@
 import React from 'react';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonProps<T extends React.ElementType> = {
+  as?: T;
   variant?: 'primary' | 'secondary' | 'danger' | 'outline';
   Icon?: React.ElementType;
   children: React.ReactNode;
-}
+} & React.ComponentPropsWithoutRef<T>;
 
-const Button: React.FC<ButtonProps> = ({
+const Button = <T extends React.ElementType = 'button'>({
+  as,
   variant = 'primary',
   Icon,
   children,
   className = '',
   disabled = false,
   ...props
-}) => {
+}: ButtonProps<T>) => {
+  const Component = as || 'button';
+
   let baseStyles = 'font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:shadow-outline';
   let variantStyles = '';
 
@@ -37,14 +41,14 @@ const Button: React.FC<ButtonProps> = ({
   const disabledStyles = disabled ? 'opacity-50 cursor-not-allowed' : '';
 
   return (
-    <button
+    <Component
       className={`${baseStyles} ${variantStyles} ${disabledStyles} ${Icon ? 'flex items-center justify-center space-x-2' : ''} ${className}`}
-      disabled={disabled}
+      disabled={Component === 'button' ? disabled : undefined}
       {...props}
     >
       {Icon && <Icon className="h-5 w-5" />}
       <span>{children}</span>
-    </button>
+    </Component>
   );
 };
 

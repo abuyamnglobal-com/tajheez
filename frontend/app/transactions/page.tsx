@@ -4,6 +4,17 @@ import InputField from '@/components/InputField';
 import SelectField from '@/components/SelectField';
 import Button from '@/components/Button';
 import Badge from '@/components/Badge';
+import {
+  MagnifyingGlassIcon,
+  CalendarIcon,
+  TagIcon,
+  CheckBadgeIcon,
+  CheckIcon,
+  ClockIcon,
+  XMarkIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+} from '@heroicons/react/24/outline';
 
 
 export default function TransactionsPage() {

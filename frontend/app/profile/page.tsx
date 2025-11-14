@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
+import { UserIcon, BriefcaseIcon, EnvelopeIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 
 export default function ProfilePage() {

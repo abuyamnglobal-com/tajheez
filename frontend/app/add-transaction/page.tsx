@@ -6,6 +6,16 @@ import Layout from '@/components/Layout';
 import InputField from '@/components/InputField';
 import SelectField from '@/components/SelectField';
 import Button from '@/components/Button';
+import {
+  BuildingOfficeIcon,
+  UserGroupIcon,
+  TagIcon,
+  CurrencyDollarIcon,
+  CreditCardIcon,
+  CalendarIcon,
+  PaperClipIcon,
+  PlusCircleIcon,
+} from '@heroicons/react/24/outline';
 
 
 export default function AddTransactionPage() {

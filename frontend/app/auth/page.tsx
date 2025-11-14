@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import InputField from '@/components/InputField';
 import Button from '@/components/Button';
 import { login } from '@/lib/api/auth';
+import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 
 export default function AuthPage() {
