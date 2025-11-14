@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import InputField from '@/components/InputField';
