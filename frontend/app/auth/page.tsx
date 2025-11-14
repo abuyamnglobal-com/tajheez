@@ -15,6 +15,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // test
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
