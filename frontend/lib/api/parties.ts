@@ -1,18 +1,11 @@
-// frontend/lib/api/parties.ts
+import { apiFetch } from './client';
 
-interface Party {
-  id: string;
+export interface Party {
+  id: number;
   name: string;
+  type: string;
 }
 
-const dummyParties: Party[] = [
-  { id: '1', name: 'Supplier A' },
-  { id: '2', name: 'Client B' },
-  { id: '3', name: 'Internal Dept C' },
-  { id: '4', name: 'Partner D' },
-];
-
 export async function getParties(): Promise<Party[]> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return dummyParties;
+  return apiFetch<Party[]>('/api/parties');
 }

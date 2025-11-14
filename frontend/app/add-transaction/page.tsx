@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import InputField from '@/components/InputField';
 import SelectField from '@/components/SelectField';
@@ -14,23 +14,53 @@ import {
   PaperClipIcon,
   PlusCircleIcon,
 } from '@heroicons/react/24/outline';
+import { createTransaction, CreateTransactionPayload } from '@/lib/api/transactions';
+import { getParties, Party } from '@/lib/api/parties';
+import { getCategories, Category } from '@/lib/api/categories';
+import { getPaymentMethods, PaymentMethod } from '@/lib/api/payment-methods';
 
 
 export default function AddTransactionPage() {
-  const [formData, setFormData] = useState({
-    company: '',
-    fromParty: '',
-    toParty: '',
-    category: '',
-    amount: '',
-    paymentMethod: '',
-    date: '',
+  const [formData, setFormData] = useState<Omit<CreateTransactionPayload, 'created_by'>>({
+    trx_date: '',
+    from_party_id: 0,
+    to_party_id: 0,
+    category_code: '',
+    amount: 0,
+    payment_method_code: '',
     description: '',
-    attachment: null as File | null,
+    from_account_id: null,
+    to_account_id: null,
+    related_tx_id: null,
   });
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  const [parties, setParties] = useState<Party[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [partiesData, categoriesData, paymentMethodsData] = await Promise.all([
+          getParties(),
+          getCategories(),
+          getPaymentMethods(),
+        ]);
+        setParties(partiesData);
+        setCategories(categoriesData);
+        setPaymentMethods(paymentMethodsData);
+      } catch (error) {
+        console.error('Failed to fetch form data', error);
+        setErrors({ submit: 'Failed to load form data. Please refresh the page.' });
+      }
+    }
+    fetchData();
+  }, []);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -47,23 +77,22 @@ export default function AddTransactionPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData((prev) => ({ ...prev, attachment: e.target.files![0] }));
+      setAttachment(e.target.files[0]);
     }
   };
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
-    if (!formData.company) newErrors.company = 'Company is required';
-    if (!formData.fromParty) newErrors.fromParty = 'From Party is required';
-    if (!formData.toParty) newErrors.toParty = 'To Party is required';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (!formData.amount || parseFloat(formData.amount) <= 0) newErrors.amount = 'Amount must be greater than 0';
-    if (!formData.paymentMethod) newErrors.paymentMethod = 'Payment Method is required';
-    if (!formData.date) newErrors.date = 'Date is required';
+    if (!formData.from_party_id) newErrors.from_party_id = 'From Party is required';
+    if (!formData.to_party_id) newErrors.to_party_id = 'To Party is required';
+    if (!formData.category_code) newErrors.category_code = 'Category is required';
+    if (!formData.amount || formData.amount <= 0) newErrors.amount = 'Amount must be greater than 0';
+    if (!formData.payment_method_code) newErrors.payment_method_code = 'Payment Method is required';
+    if (!formData.trx_date) newErrors.trx_date = 'Date is required';
 
-    if (formData.fromParty && formData.toParty && formData.fromParty === formData.toParty) {
-      newErrors.fromParty = 'From Party cannot be the same as To Party';
-      newErrors.toParty = 'To Party cannot be the same as From Party';
+    if (formData.from_party_id && formData.to_party_id && formData.from_party_id === formData.to_party_id) {
+      newErrors.from_party_id = 'From Party cannot be the same as To Party';
+      newErrors.to_party_id = 'To Party cannot be the same as From Party';
     }
 
     setErrors(newErrors);
@@ -79,14 +108,15 @@ export default function AddTransactionPage() {
 
     setLoading(true);
     try {
-      // Simulate API call
-      console.log('Submitting transaction:', formData);
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate network delay
+      // TODO: Get the real user ID
+      const userId = 1;
+      await createTransaction({ ...formData, created_by: userId });
       setSuccessMessage('Transaction added successfully!');
       setFormData({ // Clear form
-        company: '', fromParty: '', toParty: '', category: '', amount: '',
-        paymentMethod: '', date: '', description: '', attachment: null,
+        trx_date: '', from_party_id: 0, to_party_id: 0, category_code: '', amount: 0,
+        payment_method_code: '', description: '', from_account_id: null, to_account_id: null, related_tx_id: null,
       });
+      setAttachment(null);
       // Clear file input manually if needed, or reset form via ref
       const fileInput = document.getElementById('attachment') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
@@ -98,10 +128,6 @@ export default function AddTransactionPage() {
       setLoading(false);
     }
   };
-
-  const categories = ['Software', 'Hardware', 'Services', 'Marketing', 'Travel', 'Other'];
-  const paymentMethods = ['Bank Transfer', 'Credit Card', 'Cash', 'Cheque'];
-  const parties = ['Supplier A', 'Client B', 'Internal Dept C', 'Partner D']; // Dummy parties
 
   return (
     <Layout>
@@ -132,36 +158,36 @@ export default function AddTransactionPage() {
 
             <SelectField
               label="From Party"
-              id="fromParty"
-              name="fromParty"
-              value={formData.fromParty}
+              id="from_party_id"
+              name="from_party_id"
+              value={formData.from_party_id}
               onChange={handleChange}
-              options={parties.map(party => ({ value: party, label: party }))}
-              error={errors.fromParty}
+              options={parties.map(party => ({ value: party.id, label: party.name }))}
+              error={errors.from_party_id}
               Icon={UserGroupIcon}
               required
             />
 
             <SelectField
               label="To Party"
-              id="toParty"
-              name="toParty"
-              value={formData.toParty}
+              id="to_party_id"
+              name="to_party_id"
+              value={formData.to_party_id}
               onChange={handleChange}
-              options={parties.map(party => ({ value: party, label: party }))}
-              error={errors.toParty}
+              options={parties.map(party => ({ value: party.id, label: party.name }))}
+              error={errors.to_party_id}
               Icon={UserGroupIcon}
               required
             />
 
             <SelectField
               label="Category"
-              id="category"
-              name="category"
-              value={formData.category}
+              id="category_code"
+              name="category_code"
+              value={formData.category_code}
               onChange={handleChange}
-              options={categories.map(cat => ({ value: cat, label: cat }))}
-              error={errors.category}
+              options={categories.map(cat => ({ value: cat.code, label: cat.label }))}
+              error={errors.category_code}
               Icon={TagIcon}
               required
             />
@@ -182,24 +208,24 @@ export default function AddTransactionPage() {
 
             <SelectField
               label="Payment Method"
-              id="paymentMethod"
-              name="paymentMethod"
-              value={formData.paymentMethod}
+              id="payment_method_code"
+              name="payment_method_code"
+              value={formData.payment_method_code}
               onChange={handleChange}
-              options={paymentMethods.map(method => ({ value: method, label: method }))}
-              error={errors.paymentMethod}
+              options={paymentMethods.map(method => ({ value: method.code, label: method.label }))}
+              error={errors.payment_method_code}
               Icon={CreditCardIcon}
               required
             />
 
             <InputField
               label="Date"
-              id="date"
-              name="date"
+              id="trx_date"
+              name="trx_date"
               type="date"
-              value={formData.date}
+              value={formData.trx_date}
               onChange={handleChange}
-              error={errors.date}
+              error={errors.trx_date}
               Icon={CalendarIcon}
               required
             />
