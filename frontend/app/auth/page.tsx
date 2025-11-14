@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import InputField from '@/components/InputField';
 import Button from '@/components/Button';
 import { login } from '@/lib/api/auth';
+import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 
 export default function AuthPage() {
@@ -24,8 +25,9 @@ export default function AuthPage() {
       console.log('Login successful:', response);
       // Store token/user info in context or local storage
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

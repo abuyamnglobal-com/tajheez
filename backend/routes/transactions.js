@@ -13,6 +13,17 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /transactions/pending-approval
+router.get('/pending-approval', async (req, res) => {
+  try {
+    const { rows } = await db.query("SELECT * FROM vw_transactions_enriched WHERE status = 'SUBMITTED' ORDER BY id DESC");
+    res.json(rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 // POST /transactions
 router.post('/', async (req, res) => {
   const {

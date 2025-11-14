@@ -1,19 +1,52 @@
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import InputField from '@/components/InputField';
 import SelectField from '@/components/SelectField';
 import Button from '@/components/Button';
 import Badge from '@/components/Badge';
+import { getTransactions, TransactionRecord } from '@/lib/api/transactions';
+import {
+  MagnifyingGlassIcon,
+  CalendarIcon,
+  TagIcon,
+  CheckBadgeIcon,
+  CheckIcon,
+  ClockIcon,
+  XMarkIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+} from '@heroicons/react/24/outline';
 
 
 export default function TransactionsPage() {
-  const transactions = [
-    { id: 1, company: 'ABC Corp', amount: 1200, date: '2023-10-26', status: 'Approved', category: 'Software', type: 'Out', statusColor: 'bg-tajheez-green-light text-tajheez-green' },
-    { id: 2, company: 'XYZ Ltd', amount: 500, date: '2023-10-25', status: 'Pending', category: 'Hardware', type: 'In', statusColor: 'bg-tajheez-orange-light text-tajheez-orange' },
-    { id: 3, company: 'Global Solutions', amount: 3000, date: '2023-10-24', status: 'Rejected', category: 'Services', type: 'Out', statusColor: 'bg-tajheez-red-light text-tajheez-red' },
-    { id: 4, company: 'Tech Innovations', amount: 750, date: '2023-10-23', status: 'Approved', category: 'Software', type: 'In', statusColor: 'bg-tajheez-green-light text-tajheez-green' },
-    { id: 5, company: 'New Age Marketing', amount: 150, date: '2023-10-22', status: 'Pending', category: 'Marketing', type: 'Out', statusColor: 'bg-tajheez-orange-light text-tajheez-orange' },
-  ];
+  const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    getTransactions()
+      .then((data) => {
+        if (isMounted) {
+          setTransactions(data);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Failed to load transactions');
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const getAmountColor = (type: TransactionRecord['type']) =>
+    type === 'In' ? 'text-tajheez-green' : 'text-tajheez-red';
 
   return (
     <Layout>
@@ -63,17 +96,31 @@ export default function TransactionsPage() {
         </div>
 
         {/* Transactions List */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <div className="grid grid-cols-1 gap-4">
+        <div className="bg-white p-6 rounded-lg shadow-md mb-8 min-h-[200px]" data-testid="transactions-section">
+          {loading ? (
+            <p className="text-gray-600" data-testid="transactions-loading">Loading transactions...</p>
+          ) : error ? (
+            <p className="text-tajheez-red">Failed to load live data: {error}. Showing cached or static data.</p>
+          ) : null}
+          <div className="grid grid-cols-1 gap-4 mt-4" data-testid="transactions-list">
             {transactions.map((transaction) => (
-              <div key={transaction.id} className="flex justify-between items-center p-4 border rounded-lg shadow-sm hover:bg-gray-50 transition duration-200">
+              <div key={transaction.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-4 border rounded-lg shadow-sm hover:bg-gray-50 transition duration-200">
                 <div>
-                  <p className="text-lg font-semibold text-gray-800">{transaction.company} - ${transaction.amount}</p>
+                  <p className="text-lg font-semibold text-gray-800">
+                    {transaction.company} - <span className={getAmountColor(transaction.type)}>${transaction.amount.toLocaleString()}</span>
+                  </p>
                   <p className="text-sm text-gray-600">{transaction.category} | {transaction.date} | {transaction.type}</p>
                 </div>
-                <Badge variant={transaction.status === 'Approved' ? 'success' : transaction.status === 'Pending' ? 'warning' : 'danger'} Icon={transaction.status === 'Approved' ? CheckIcon : transaction.status === 'Pending' ? ClockIcon : XMarkIcon}>{transaction.status}</Badge>
+                <div className="mt-3 md:mt-0 flex items-center gap-2">
+                  <Badge variant={transaction.statusVariant} Icon={transaction.statusVariant === 'success' ? CheckIcon : transaction.statusVariant === 'warning' ? ClockIcon : XMarkIcon}>
+                    {transaction.status}
+                  </Badge>
+                </div>
               </div>
             ))}
+            {!loading && transactions.length === 0 && (
+              <p className="text-gray-600">No transactions found.</p>
+            )}
           </div>
         </div>
 

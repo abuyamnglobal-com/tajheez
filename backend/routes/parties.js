@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
+// GET /parties
+router.get('/', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT id, name, type FROM parties WHERE active = TRUE ORDER BY name');
+    res.json(rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 // GET /parties/balances
 router.get('/balances', async (req, res) => {
   try {

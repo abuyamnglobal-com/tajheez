@@ -1,8 +1,8 @@
-import Link from 'next/link';
 import Layout from '@/components/Layout';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Badge from '@/components/Badge';
+import { FunnelIcon, ArrowUpIcon, ArrowDownIcon, ScaleIcon } from '@heroicons/react/24/outline';
 
 
 export default function WeeklySummaryPage() {
