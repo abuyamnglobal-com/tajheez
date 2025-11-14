@@ -151,7 +151,7 @@ export default function AddTransactionPage() {
               name="from_party_id"
               value={formData.from_party_id}
               onChange={handleChange}
-              options={parties.map(party => ({ value: party.id, label: party.name }))}
+              options={parties.map(party => ({ value: party.id.toString(), label: party.name }))}
               error={errors.from_party_id}
               Icon={UserGroupIcon}
               required
@@ -163,7 +163,7 @@ export default function AddTransactionPage() {
               name="to_party_id"
               value={formData.to_party_id}
               onChange={handleChange}
-              options={parties.map(party => ({ value: party.id, label: party.name }))}
+              options={parties.map(party => ({ value: party.id.toString(), label: party.name }))}
               error={errors.to_party_id}
               Icon={UserGroupIcon}
               required
