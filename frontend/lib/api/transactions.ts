@@ -25,7 +25,7 @@ interface AddTransactionPayload {
   attachment: File | null;
 }
 
-let dummyTransactions: Transaction[] = [
+const dummyTransactions: Transaction[] = [
   { id: 1, company: 'ABC Corp', amount: 1200, date: '2023-10-26', status: 'Approved', category: 'Software', type: 'Out', statusColor: 'bg-tajheez-green-light text-tajheez-green', amountColor: 'text-tajheez-red' },
   { id: 2, company: 'XYZ Ltd', amount: 500, date: '2023-10-25', status: 'Pending', category: 'Hardware', type: 'In', statusColor: 'bg-tajheez-orange-light text-tajheez-orange', amountColor: 'text-tajheez-green' },
   { id: 3, company: 'Global Solutions', amount: 3000, date: '2023-10-24', status: 'Rejected', category: 'Services', type: 'Out', statusColor: 'bg-tajheez-red-light text-tajheez-red', amountColor: 'text-tajheez-red' },

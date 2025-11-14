@@ -1,6 +1,4 @@
 'use client';
-
-import Link from 'next/link';
 import { useState } from 'react';
 import Layout from '@/components/Layout';
 import InputField from '@/components/InputField';
@@ -93,7 +91,8 @@ export default function AddTransactionPage() {
       const fileInput = document.getElementById('attachment') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to add transaction', error);
       setErrors({ submit: 'Failed to add transaction. Please try again.' });
     } finally {
       setLoading(false);

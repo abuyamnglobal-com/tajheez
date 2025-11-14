@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';

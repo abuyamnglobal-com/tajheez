@@ -13,7 +13,7 @@ const Badge: React.FC<BadgeProps> = ({
   children,
   className = '',
 }) => {
-  let baseStyles = 'px-3 py-1 rounded-full text-xs font-semibold';
+  const baseStyles = 'px-3 py-1 rounded-full text-xs font-semibold';
   let variantStyles = '';
 
   switch (variant) {

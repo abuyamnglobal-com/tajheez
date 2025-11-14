@@ -18,7 +18,7 @@ const Button = <T extends React.ElementType = 'button'>({
 }: ButtonProps<T>) => {
   const Component = as || 'button';
 
-  let baseStyles = 'font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:shadow-outline';
+  const baseStyles = 'font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:shadow-outline';
   let variantStyles = '';
 
   switch (variant) {

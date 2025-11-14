@@ -25,8 +25,9 @@ export default function AuthPage() {
       console.log('Login successful:', response);
       // Store token/user info in context or local storage
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
