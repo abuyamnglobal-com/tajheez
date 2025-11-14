@@ -38,6 +38,8 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          export VERCEL_ORG_ID="$VERCEL_ORG_ID"
+          export VERCEL_PROJECT_ID="$VERCEL_PROJECT_ID"
           npx vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
           npx vercel build --prod --token "$VERCEL_TOKEN"
-          npx vercel deploy --prebuilt --token "$VERCEL_TOKEN"
+          npx vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN"

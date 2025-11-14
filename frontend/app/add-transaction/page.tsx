@@ -5,7 +5,6 @@ import InputField from '@/components/InputField';
 import SelectField from '@/components/SelectField';
 import Button from '@/components/Button';
 import {
-  BuildingOfficeIcon,
   UserGroupIcon,
   TagIcon,
   CurrencyDollarIcon,
@@ -228,6 +227,11 @@ export default function AddTransactionPage() {
               Icon={PaperClipIcon}
               className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-tajheez-orange-light file:text-tajheez-orange hover:file:bg-tajheez-orange-light"
             />
+            {attachment && (
+              <p className="text-xs text-gray-500">
+                Selected file: <span className="font-semibold">{attachment.name}</span>
+              </p>
+            )}
 
             <div className="md:col-span-2">
               <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">Description</label>

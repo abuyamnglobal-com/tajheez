@@ -3,10 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'standalone',
   distDir: '.next',
-  experimental: {
-  },
-  basePath: '/tajheez',
-  assetPrefix: '/tajheez/',
+  experimental: {},
   /* config options here */
   reactCompiler: true,
 };
