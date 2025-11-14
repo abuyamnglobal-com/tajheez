@@ -145,17 +145,6 @@ export default function AddTransactionPage() {
             </div>
           )}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField
-              label="Company"
-              id="company"
-              name="company"
-              value={formData.company}
-              onChange={handleChange}
-              error={errors.company}
-              Icon={BuildingOfficeIcon}
-              required
-            />
-
             <SelectField
               label="From Party"
               id="from_party_id"
