@@ -26,10 +26,7 @@ export default function PartyStatementPage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedPartyId) {
-      setStatement([]);
-      return;
-    }
+    if (!selectedPartyId) return;
     setLoading(true);
     setError(null);
     getPartyStatement(Number(selectedPartyId))
@@ -39,6 +36,12 @@ export default function PartyStatementPage() {
         setError(message);
       })
       .finally(() => setLoading(false));
+  }, [selectedPartyId]);
+
+  useEffect(() => {
+    if (selectedPartyId) return;
+    setStatement([]);
+    setLoading(false);
   }, [selectedPartyId]);
 
   const selectedParty = parties.find((party) => party.id === Number(selectedPartyId));
