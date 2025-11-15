@@ -19,6 +19,12 @@ import { getCategories, Category } from '@/lib/api/categories';
 import { getPaymentMethods, PaymentMethod } from '@/lib/api/payment-methods';
 
 
+const BRAND_COLORS = {
+  NAVY: '#101F3B',
+  ORANGE: '#FF8C00',
+  BG_LIGHT: '#F7F8F9',
+};
+
 export default function AddTransactionPage() {
   const [formData, setFormData] = useState<Omit<CreateTransactionPayload, 'created_by'>>({
     trx_date: '',
@@ -129,17 +135,35 @@ export default function AddTransactionPage() {
   };
 
   return (
-    <Layout>
-        <h1 className="text-3xl font-bold text-tajheez-dark-navy mb-8">Add New Transaction</h1>
+    <Layout mainClassName="bg-[#F7F8F9] p-0">
+      <div className="max-w-4xl mx-auto p-6 pb-16 space-y-6">
+        <header className="flex items-center gap-4">
+          <button
+            type="button"
+            className="p-2 rounded-full bg-white shadow text-gray-500 hover:text-gray-900"
+            onClick={() => history.back()}
+            aria-label="Back"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <div>
+            <p className="text-sm text-gray-500">Transactions</p>
+            <h1 className="text-2xl font-bold" style={{ color: BRAND_COLORS.NAVY }}>
+              Add New Transaction
+            </h1>
+          </div>
+        </header>
 
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto">
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100">
           {successMessage && (
-            <div className="bg-tajheez-green-light border border-tajheez-green text-tajheez-green px-4 py-3 rounded relative mb-4" role="alert">
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
               <span className="block sm:inline">{successMessage}</span>
             </div>
           )}
           {errors.submit && (
-            <div className="bg-tajheez-red-light border border-tajheez-red text-tajheez-red px-4 py-3 rounded relative mb-4" role="alert">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
               <span className="block sm:inline">{errors.submit}</span>
             </div>
           )}
@@ -257,6 +281,7 @@ export default function AddTransactionPage() {
             </div>
           </form>
         </div>
+      </div>
     </Layout>
   );
 }
