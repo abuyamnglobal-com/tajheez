@@ -26,22 +26,30 @@ export default function PartyStatementPage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedPartyId) return;
+    let active = true;
+    if (!selectedPartyId) {
+      setStatement([]);
+      setLoading(false);
+      return undefined;
+    }
     setLoading(true);
     setError(null);
     getPartyStatement(Number(selectedPartyId))
-      .then(setStatement)
+      .then((data) => {
+        if (!active) return;
+        setStatement(data);
+      })
       .catch((err) => {
+        if (!active) return;
         const message = err instanceof Error ? err.message : 'Unable to load statement';
         setError(message);
       })
-      .finally(() => setLoading(false));
-  }, [selectedPartyId]);
-
-  useEffect(() => {
-    if (selectedPartyId) return;
-    setStatement([]);
-    setLoading(false);
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [selectedPartyId]);
 
   const selectedParty = parties.find((party) => party.id === Number(selectedPartyId));
