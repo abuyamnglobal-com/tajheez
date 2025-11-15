@@ -8,6 +8,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,15 +24,12 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend
         run: npm ci
 
       - name: Lint
-        working-directory: frontend
         run: npm run lint
 
       - name: Build
-        working-directory: frontend
         run: npm run build
 
       - name: Deploy to Vercel
@@ -36,10 +37,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        working-directory: frontend
         run: |
-          export VERCEL_ORG_ID="$VERCEL_ORG_ID"
-          export VERCEL_PROJECT_ID="$VERCEL_PROJECT_ID"
           npx vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
           npx vercel build --prod --token "$VERCEL_TOKEN"
-          npx vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN"
+          npx vercel --prebuilt --prod --token "$VERCEL_TOKEN"
