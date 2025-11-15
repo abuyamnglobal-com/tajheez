@@ -26,14 +26,8 @@ export default function PartyStatementPage() {
   }, []);
 
   useEffect(() => {
+    if (!selectedPartyId) return undefined;
     let active = true;
-    if (!selectedPartyId) {
-      setStatement([]);
-      setLoading(false);
-      return undefined;
-    }
-    setLoading(true);
-    setError(null);
     getPartyStatement(Number(selectedPartyId))
       .then((data) => {
         if (!active) return;
@@ -85,7 +79,18 @@ export default function PartyStatementPage() {
                 label="Party"
                 id="party-select"
                 value={selectedPartyId}
-                onChange={(e) => setSelectedPartyId(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedPartyId(value);
+                  if (!value) {
+                    setStatement([]);
+                    setLoading(false);
+                    setError(null);
+                  } else {
+                    setLoading(true);
+                    setError(null);
+                  }
+                }}
                 options={parties.map((party) => ({ value: String(party.id), label: party.name }))}
                 Icon={UserGroupIcon}
               />
