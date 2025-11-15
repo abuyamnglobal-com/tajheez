@@ -1,86 +1,162 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/Layout';
 import SelectField from '@/components/SelectField';
 import Badge from '@/components/Badge';
-import { UserGroupIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
+import TajheezHeader from '@/components/TajheezHeader';
+import { BRAND_COLORS } from '@/lib/theme/brand';
+import { getParties, Party, getPartyStatement, PartyStatementEntry } from '@/lib/api/parties';
+import { UserGroupIcon, ArrowUpIcon, ArrowDownIcon, ScaleIcon } from '@heroicons/react/24/outline';
 
+const deriveType = (entry: PartyStatementEntry) =>
+  entry.to_party === entry.party_name ? 'Credit' : 'Debit';
 
 export default function PartyStatementPage() {
-  const [selectedParty, setSelectedParty] = useState('');
+  const [parties, setParties] = useState<Party[]>([]);
+  const [selectedPartyId, setSelectedPartyId] = useState<string>('');
+  const [statement, setStatement] = useState<PartyStatementEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const parties = ['Supplier A', 'Client B', 'Internal Dept C', 'Partner D'];
+  useEffect(() => {
+    getParties()
+      .then(setParties)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Unable to load parties'));
+  }, []);
 
-  const partyStatements = {
-    'Supplier A': [
-      { id: 1, date: '2023-09-15', description: 'Payment for services', type: 'Debit', amount: 5000, statusColor: 'bg-tajheez-red-light text-tajheez-red', amountColor: 'text-tajheez-red' },
-      { id: 2, date: '2023-10-01', description: 'Invoice #12345', type: 'Credit', amount: 7500, statusColor: 'bg-tajheez-green-light text-tajheez-green', amountColor: 'text-tajheez-green' },
-      { id: 3, date: '2023-10-20', description: 'Payment for goods', type: 'Debit', amount: 2000, statusColor: 'bg-tajheez-red-light text-tajheez-red', amountColor: 'text-tajheez-red' },
-    ],
-    'Client B': [
-      { id: 4, date: '2023-09-20', description: 'Project advance', type: 'Credit', amount: 10000, statusColor: 'bg-tajheez-green-light text-tajheez-green', amountColor: 'text-tajheez-green' },
-      { id: 5, date: '2023-10-10', description: 'Partial payment', type: 'Debit', amount: 3000, statusColor: 'bg-tajheez-red-light text-tajheez-red', amountColor: 'text-tajheez-red' },
-    ],
-    'Internal Dept C': [
-      { id: 6, date: '2023-10-05', description: 'Budget allocation', type: 'Credit', amount: 20000, statusColor: 'bg-tajheez-green-light text-tajheez-green', amountColor: 'text-tajheez-green' },
-    ],
-  };
+  useEffect(() => {
+    if (!selectedPartyId) {
+      setStatement([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    getPartyStatement(Number(selectedPartyId))
+      .then(setStatement)
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : 'Unable to load statement';
+        setError(message);
+      })
+      .finally(() => setLoading(false));
+  }, [selectedPartyId]);
 
-  const currentStatement = selectedParty ? partyStatements[selectedParty as keyof typeof partyStatements] : [];
+  const selectedParty = parties.find((party) => party.id === Number(selectedPartyId));
+
+  const totals = useMemo(() => {
+    return statement.reduce(
+      (acc, entry) => {
+        const type = deriveType(entry);
+        if (type === 'Credit') {
+          acc.credit += entry.amount;
+        } else {
+          acc.debit += entry.amount;
+        }
+        return acc;
+      },
+      { credit: 0, debit: 0 }
+    );
+  }, [statement]);
+
+  const net = totals.credit - totals.debit;
 
   return (
-    <Layout>        <h1 className="text-3xl font-bold text-tajheez-dark-navy mb-8">Party Statement Report</h1>
-
-        {/* Party Selection */}
-        <div className="mb-8 flex items-center gap-4">
-          <SelectField
-            label="Select Party:"
-            id="party-select"
-            value={selectedParty}
-            onChange={(e) => setSelectedParty(e.target.value)}
-            options={parties.map(party => ({ value: party, label: party }))}
-            Icon={UserGroupIcon}
-            className="p-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-tajheez-orange"
-          />
-        </div>
-
-        {/* Financial History */}
-        {selectedParty && (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold text-tajheez-dark-navy mb-4">Statement for {selectedParty}</h2>
-            {currentStatement.length === 0 ? (
-              <p className="text-gray-600">No financial history available for this party.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {currentStatement.map((item) => (
-                      <tr key={item.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.date}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.description}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <Badge variant={item.type === 'Credit' ? 'success' : 'danger'} Icon={item.type === 'Credit' ? ArrowUpIcon : ArrowDownIcon}>{item.type}</Badge>
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${item.amountColor}`}>
-                          ${item.amount.toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+    <Layout mainClassName="p-0">
+      <div className="min-h-screen" style={{ backgroundColor: BRAND_COLORS.BG_LIGHT }}>
+        <TajheezHeader title="Reports" subtitle="Party Statement" />
+        <div className="p-4 pt-6 pb-24 md:px-8 space-y-6">
+          <section className="bg-white rounded-2xl shadow-md p-4 md:p-6 space-y-4">
+            <h1 className="text-2xl font-bold" style={{ color: BRAND_COLORS.NAVY }}>
+              Party Statement Report
+            </h1>
+            <div className="max-w-md">
+              <SelectField
+                label="Party"
+                id="party-select"
+                value={selectedPartyId}
+                onChange={(e) => setSelectedPartyId(e.target.value)}
+                options={parties.map((party) => ({ value: String(party.id), label: party.name }))}
+                Icon={UserGroupIcon}
+              />
+            </div>
+            {selectedParty && (
+              <p className="text-sm text-gray-500">
+                Showing approved transactions for <span className="font-semibold">{selectedParty.name}</span>
+              </p>
             )}
-          </div>
-        )}
+          </section>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
+          )}
+
+          {selectedParty && (
+            <>
+              <section className="grid gap-4 md:grid-cols-3">
+                <div className="bg-white rounded-2xl shadow-md p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Total Credit</p>
+                  <p className="text-3xl font-bold text-tajheez-green mt-2">{totals.credit.toLocaleString()} OMR</p>
+                  <ArrowUpIcon className="h-8 w-8 text-tajheez-green mt-2" />
+                </div>
+                <div className="bg-white rounded-2xl shadow-md p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Total Debit</p>
+                  <p className="text-3xl font-bold text-tajheez-red mt-2">{totals.debit.toLocaleString()} OMR</p>
+                  <ArrowDownIcon className="h-8 w-8 text-tajheez-red mt-2" />
+                </div>
+                <div className="bg-white rounded-2xl shadow-md p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Net Position</p>
+                  <p
+                    className={`text-3xl font-bold mt-2 ${net >= 0 ? 'text-tajheez-green' : 'text-tajheez-red'}`}
+                  >
+                    {net.toLocaleString()} OMR
+                  </p>
+                  <ScaleIcon className="h-8 w-8 text-tajheez-dark-navy mt-2" />
+                </div>
+              </section>
+
+              <section className="bg-white rounded-2xl shadow-md p-4 md:p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold" style={{ color: BRAND_COLORS.NAVY }}>
+                    Financial History
+                  </h2>
+                  {loading && <span className="text-sm text-gray-500">Loading...</span>}
+                </div>
+                {statement.length === 0 && !loading ? (
+                  <p className="text-gray-600">No financial history available for this party.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {statement.map((item) => {
+                      const type = deriveType(item);
+                      const isCredit = type === 'Credit';
+                      return (
+                        <div key={item.transaction_id} className="border border-gray-100 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-gray-500">{item.trx_date}</p>
+                            <p className="text-lg font-semibold" style={{ color: BRAND_COLORS.NAVY }}>
+                              {item.description || item.category_code}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              From {item.from_party} · To {item.to_party}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge variant={isCredit ? 'success' : 'danger'} Icon={isCredit ? ArrowUpIcon : ArrowDownIcon}>
+                              {type}
+                            </Badge>
+                            <p className={`text-lg font-bold ${isCredit ? 'text-tajheez-green' : 'text-tajheez-red'}`}>
+                              {isCredit ? '+' : '-'} {item.amount.toLocaleString()} OMR
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 }

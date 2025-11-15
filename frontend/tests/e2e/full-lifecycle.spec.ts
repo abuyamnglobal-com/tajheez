@@ -5,14 +5,11 @@ test.describe('Full transaction lifecycle', () => {
   const transactionDescription = `Test transaction ${new Date().getTime()}`;
 
   test('should allow a user to create, approve, and see a transaction', async ({ page, request }) => {
-    // 1. Log in
-    await page.goto('/auth');
-    await page.getByLabel('Email').fill('approver@example.com');
-    await page.getByLabel('Password').fill('password'); // Assuming a default password
-    await page.getByRole('button', { name: /login/i }).click();
-    await expect(page).toHaveURL('/dashboard');
+    // Authentication is disabled, so land directly on the dashboard.
+    await page.goto('/dashboard');
+    await expect(page.getByRole('heading', { name: /recent activity/i })).toBeVisible();
 
-    // 2. Create a new transaction that requires approval
+    // 1. Create a new transaction that requires approval
     await page.goto('/add-transaction');
     await expect(page.getByRole('heading', { name: /add new transaction/i })).toBeVisible();
     await expect(page.getByLabel('From Party')).not.toBeEmpty();

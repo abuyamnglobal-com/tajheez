@@ -32,11 +32,13 @@ const transactionsRouter = require('./routes/transactions');
 const partiesRouter = require('./routes/parties');
 const categoriesRouter = require('./routes/categories');
 const paymentMethodsRouter = require('./routes/payment-methods');
+const usersRouter = require('./routes/users');
 
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/parties', partiesRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/payment-methods', paymentMethodsRouter);
+app.use('/api/users', usersRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

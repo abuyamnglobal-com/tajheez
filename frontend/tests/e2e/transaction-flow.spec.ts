@@ -1,12 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Transaction flow smoke', () => {
-  test('login page renders and accepts input', async ({ page }) => {
+  test('auth route immediately redirects to dashboard', async ({ page }) => {
     await page.goto('/auth');
-    await expect(page.getByRole('heading', { name: /login to tajheez/i })).toBeVisible();
-    await page.getByLabel('Email').fill('user@example.com');
-    await page.getByLabel('Password').fill('password');
-    await expect(page.getByRole('button', { name: /login/i })).toBeEnabled();
+    await expect(page).toHaveURL(/\/dashboard$/);
   });
 
   test('transactions list loads', async ({ page }) => {

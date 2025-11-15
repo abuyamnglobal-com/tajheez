@@ -96,12 +96,14 @@ const KpiCard = ({ title, value, color, icon: Icon, valueColor = 'white' }: KpiC
   </div>
 );
 
+type TransactionStatus = keyof typeof BRAND_COLORS.STATUS;
+
 interface Transaction {
   id: number;
   date: string;
   description: string;
   amount: string;
-  status: keyof typeof BRAND_COLORS.STATUS;
+  status: TransactionStatus;
   type: 'IN' | 'OUT';
   category: string;
 }
@@ -144,7 +146,15 @@ const TransactionItem = ({ data }: { data: Transaction }) => {
   );
 };
 
-const QuickActions = ({ onAddTransaction, onNavigate }: { onAddTransaction: () => void; onNavigate: () => void }) => (
+type PrototypeScreen = 'dashboard' | 'add' | 'approvals' | 'reports';
+
+const QuickActions = ({
+  onAddTransaction,
+  onNavigate,
+}: {
+  onAddTransaction: () => void;
+  onNavigate: (screen: PrototypeScreen) => void;
+}) => (
   <div className="flex gap-4 p-4 overflow-x-auto">
     <IconButton label="Add Transaction" icon={Plus} onClick={onAddTransaction} isPrimary />
     <IconButton label="Approvals (5)" icon={CheckCircle} onClick={() => onNavigate('approvals')} />
@@ -153,7 +163,7 @@ const QuickActions = ({ onAddTransaction, onNavigate }: { onAddTransaction: () =
 );
 
 const DashboardPrototype = () => {
-  const [screen, setScreen] = useState<'dashboard' | 'add' | 'approvals'>('dashboard');
+  const [screen, setScreen] = useState<PrototypeScreen>('dashboard');
   const mockKPIs = [
     { title: 'Total In', value: '15,450 OMR', color: BRAND_COLORS.STATUS.APPROVED, icon: Plus },
     { title: 'Total Out', value: '9,120 OMR', color: BRAND_COLORS.STATUS.REJECTED, icon: Trash2 },
@@ -161,11 +171,11 @@ const DashboardPrototype = () => {
     { title: 'Pending Approvals', value: '5', color: BRAND_COLORS.STATUS.SUBMITTED, icon: Clock },
   ];
 
-  const mockTransactions = [
-    { id: 1, date: '2025-11-12', description: 'Loan to Raed', amount: '2,000', status: 'SUBMITTED', type: 'OUT', category: 'Loan' },
-    { id: 2, date: '2025-11-11', description: 'Office Rent Payment', amount: '500', status: 'APPROVED', type: 'OUT', category: 'Expense' },
-    { id: 3, date: '2025-11-11', description: 'Capital Injection', amount: '10,000', status: 'APPROVED', type: 'IN', category: 'Transfer' },
-  ];
+const mockTransactions: Transaction[] = [
+  { id: 1, date: '2025-11-12', description: 'Loan to Raed', amount: '2,000', status: 'SUBMITTED', type: 'OUT', category: 'Loan' },
+  { id: 2, date: '2025-11-11', description: 'Office Rent Payment', amount: '500', status: 'APPROVED', type: 'OUT', category: 'Expense' },
+  { id: 3, date: '2025-11-11', description: 'Capital Injection', amount: '10,000', status: 'APPROVED', type: 'IN', category: 'Transfer' },
+];
 
   if (screen === 'dashboard') {
     return (
@@ -177,7 +187,7 @@ const DashboardPrototype = () => {
               <KpiCard key={index} {...kpi} />
             ))}
           </div>
-          <QuickActions onAddTransaction={() => setScreen('add')} onNavigate={() => setScreen('approvals')} />
+          <QuickActions onAddTransaction={() => setScreen('add')} onNavigate={(target) => setScreen(target)} />
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: BRAND_COLORS.NAVY }}>
               Recent Activity

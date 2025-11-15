@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import InputField from '@/components/InputField';
 import SelectField from '@/components/SelectField';
 import Button from '@/components/Button';
+import { BRAND_COLORS } from '@/lib/theme/brand';
 import {
   UserGroupIcon,
   TagIcon,
@@ -17,13 +18,6 @@ import { createTransaction, CreateTransactionPayload } from '@/lib/api/transacti
 import { getParties, Party } from '@/lib/api/parties';
 import { getCategories, Category } from '@/lib/api/categories';
 import { getPaymentMethods, PaymentMethod } from '@/lib/api/payment-methods';
-
-
-const BRAND_COLORS = {
-  NAVY: '#101F3B',
-  ORANGE: '#FF8C00',
-  BG_LIGHT: '#F7F8F9',
-};
 
 export default function AddTransactionPage() {
   const [formData, setFormData] = useState<Omit<CreateTransactionPayload, 'created_by'>>({

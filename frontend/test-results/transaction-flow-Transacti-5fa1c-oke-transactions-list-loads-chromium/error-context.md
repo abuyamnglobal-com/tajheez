@@ -1,0 +1,119 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "TAJHEEZ" [level=2] [ref=e4]
+      - navigation [ref=e5]:
+        - list [ref=e6]:
+          - listitem [ref=e7]:
+            - link "Dashboard" [ref=e8] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e9]
+              - generic [ref=e11]: Dashboard
+          - listitem [ref=e12]:
+            - link "Transactions" [ref=e13] [cursor=pointer]:
+              - /url: /transactions
+              - img [ref=e14]
+              - generic [ref=e16]: Transactions
+          - listitem [ref=e17]:
+            - link "Approvals" [ref=e18] [cursor=pointer]:
+              - /url: /approvals
+              - img [ref=e19]
+              - generic [ref=e21]: Approvals
+          - listitem [ref=e22]:
+            - link "Reports" [ref=e23] [cursor=pointer]:
+              - /url: /reports
+              - img [ref=e24]
+              - generic [ref=e27]: Reports
+          - listitem [ref=e28]:
+            - link "Profile" [ref=e29] [cursor=pointer]:
+              - /url: /profile
+              - img [ref=e30]
+              - generic [ref=e32]: Profile
+    - main [ref=e33]:
+      - heading "Transactions" [level=1] [ref=e34]
+      - generic [ref=e35]:
+        - generic [ref=e37]:
+          - img [ref=e38]
+          - textbox "Search transactions..." [ref=e40]
+        - generic [ref=e42]:
+          - img
+          - combobox [ref=e43]:
+            - option "Select" [selected]
+            - option "All Dates"
+            - option "Last 7 Days"
+            - option "Last 30 Days"
+        - generic [ref=e45]:
+          - img
+          - combobox [ref=e46]:
+            - option "Select" [selected]
+            - option "All Categories"
+            - option "Software"
+            - option "Hardware"
+            - option "Services"
+        - generic [ref=e48]:
+          - img
+          - combobox [ref=e49]:
+            - option "Select" [selected]
+            - option "All Statuses"
+            - option "Approved"
+            - option "Pending"
+            - option "Rejected"
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - paragraph [ref=e54]:
+              - text: ABC Corp -
+              - generic [ref=e55]: $1,200
+            - paragraph [ref=e56]: Software | 2023-10-26 | Out
+          - generic [ref=e58]:
+            - img [ref=e59]
+            - generic [ref=e61]: Approved
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - paragraph [ref=e64]:
+              - text: XYZ Ltd -
+              - generic [ref=e65]: $500
+            - paragraph [ref=e66]: Hardware | 2023-10-25 | In
+          - generic [ref=e68]:
+            - img [ref=e69]
+            - generic [ref=e71]: Pending
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - paragraph [ref=e74]:
+              - text: Global Solutions -
+              - generic [ref=e75]: $3,000
+            - paragraph [ref=e76]: Services | 2023-10-24 | Out
+          - generic [ref=e78]:
+            - img [ref=e79]
+            - generic [ref=e81]: Rejected
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - paragraph [ref=e84]:
+              - text: Tech Innovations -
+              - generic [ref=e85]: $750
+            - paragraph [ref=e86]: Software | 2023-10-23 | In
+          - generic [ref=e88]:
+            - img [ref=e89]
+            - generic [ref=e91]: Approved
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - paragraph [ref=e94]:
+              - text: New Age Marketing -
+              - generic [ref=e95]: $150
+            - paragraph [ref=e96]: Marketing | 2023-10-22 | Out
+          - generic [ref=e98]:
+            - img [ref=e99]
+            - generic [ref=e101]: Pending
+      - generic [ref=e102]:
+        - button "Previous" [ref=e103]:
+          - img [ref=e104]
+          - generic [ref=e106]: Previous
+        - generic [ref=e107]: Page 1 of 5
+        - button "Next" [ref=e108]:
+          - img [ref=e109]
+          - generic [ref=e111]: Next
+  - alert [ref=e112]
+```

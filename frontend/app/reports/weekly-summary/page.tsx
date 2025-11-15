@@ -1,87 +1,155 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/Layout';
-import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Badge from '@/components/Badge';
+import TajheezHeader from '@/components/TajheezHeader';
+import { BRAND_COLORS } from '@/lib/theme/brand';
+import { getWeeklySummary, WeeklySummary, WeeklySummaryFilters } from '@/lib/api/reports';
 import { FunnelIcon, ArrowUpIcon, ArrowDownIcon, ScaleIcon } from '@heroicons/react/24/outline';
 
-
 export default function WeeklySummaryPage() {
-  const summary = {
-    inflow: 25000,
-    outflow: 18000,
-    net: 7000,
+  const [summary, setSummary] = useState<WeeklySummary | null>(null);
+  const [filters, setFilters] = useState<WeeklySummaryFilters>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSummary = async (range: WeeklySummaryFilters = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getWeeklySummary(range);
+      setSummary(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to load weekly summary';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const transactions = [
-    { id: 1, date: '2023-10-23', description: 'Project payment', type: 'Inflow', amount: 15000, statusColor: 'bg-tajheez-green-light text-tajheez-green', amountColor: 'text-tajheez-green' },
-    { id: 2, date: '2023-10-24', description: 'Office supplies', type: 'Outflow', amount: 500, statusColor: 'bg-tajheez-red-light text-tajheez-red', amountColor: 'text-tajheez-red' },
-    { id: 3, date: '2023-10-25', description: 'Consulting fee', type: 'Inflow', amount: 10000, statusColor: 'bg-tajheez-green-light text-tajheez-green', amountColor: 'text-tajheez-green' },
-    { id: 4, date: '2023-10-26', description: 'Software subscription', type: 'Outflow', amount: 1500, statusColor: 'bg-tajheez-red-light text-tajheez-red', amountColor: 'text-tajheez-red' },
-  ];
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
+  const handleApplyFilters = () => {
+    fetchSummary(filters);
+  };
+
+  const summaryCards = useMemo(() => {
+    if (!summary) return [];
+    return [
+      { label: 'Total Inflow', value: summary.inflow, icon: ArrowUpIcon, colorClass: 'text-tajheez-green' },
+      { label: 'Total Outflow', value: summary.outflow, icon: ArrowDownIcon, colorClass: 'text-tajheez-red' },
+      { label: 'Net Position', value: summary.net, icon: ScaleIcon, colorClass: 'text-tajheez-dark-navy' },
+    ];
+  }, [summary]);
 
   return (
-    <Layout>
-        <h1 className="text-3xl font-bold text-tajheez-dark-navy mb-8">Weekly Summary Report</h1>
-
-        {/* Date Range Filter */}
-        <div className="mb-8 flex items-center gap-4">
-          <label htmlFor="date-range" className="text-gray-700 font-semibold">Date Range:</label>
-          <input type="date" id="start-date" className="p-2 border rounded-lg" />
-          <span>to</span>
-          <input type="date" id="end-date" className="p-2 border rounded-lg" />
-          <Button Icon={FunnelIcon}>Apply</Button>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <h2 className="text-lg font-semibold text-gray-600 flex items-center space-x-2"><ArrowUpIcon className="h-5 w-5 text-tajheez-green" /><span>Total Inflow</span></h2>
-            <p className="text-3xl font-bold text-tajheez-green">${summary.inflow.toLocaleString()}</p>
-          </Card>
-          <Card>
-            <h2 className="text-lg font-semibold text-gray-600 flex items-center space-x-2"><ArrowDownIcon className="h-5 w-5 text-tajheez-red" /><span>Total Outflow</span></h2>
-            <p className="text-3xl font-bold text-tajheez-red">${summary.outflow.toLocaleString()}</p>
-          </Card>
-          <Card>
-            <h2 className="text-lg font-semibold text-gray-600 flex items-center space-x-2"><ScaleIcon className="h-5 w-5 text-tajheez-dark-navy" /><span>Net Position</span></h2>
-            <p className="text-3xl font-bold text-tajheez-dark-navy">${summary.net.toLocaleString()}</p>
-          </Card>
-        </div>
-
-        {/* Detailed Transactions List */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold text-tajheez-dark-navy mb-4">Transactions in Period</h2>
-          {transactions.length === 0 ? (
-            <p className="text-gray-600">No transactions found for this period.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {transactions.map((tx) => (
-                    <tr key={tx.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.date}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.description}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <Badge variant={tx.type === 'Inflow' ? 'success' : 'danger'} Icon={tx.type === 'Inflow' ? ArrowUpIcon : ArrowDownIcon}>{tx.type}</Badge>
-                      </td>
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${tx.amountColor}`}>
-                        ${tx.amount.toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    <Layout mainClassName="p-0">
+      <div className="min-h-screen" style={{ backgroundColor: BRAND_COLORS.BG_LIGHT }}>
+        <TajheezHeader title="Reports" subtitle="Weekly Summary" />
+        <div className="p-4 pt-6 pb-24 md:px-8 space-y-6">
+          <section className="bg-white rounded-2xl shadow-md p-4 md:p-6 space-y-4">
+            <div>
+              <p className="text-sm text-gray-500">Showing</p>
+              <h1 className="text-2xl font-bold" style={{ color: BRAND_COLORS.NAVY }}>
+                Weekly Summary Report
+              </h1>
+              {summary && (
+                <p className="text-sm text-gray-500 mt-1">
+                  {summary.range.start} — {summary.range.end}
+                </p>
+              )}
             </div>
+            <div className="flex flex-wrap gap-4 items-end">
+              <div className="flex flex-col flex-1 min-w-[160px]">
+                <label htmlFor="start-date" className="text-sm font-semibold text-gray-700 mb-1">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  id="start-date"
+                  value={filters.startDate || ''}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
+                  className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tajheez-orange"
+                />
+              </div>
+              <div className="flex flex-col flex-1 min-w-[160px]">
+                <label htmlFor="end-date" className="text-sm font-semibold text-gray-700 mb-1">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  id="end-date"
+                  value={filters.endDate || ''}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
+                  className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-tajheez-orange"
+                />
+              </div>
+              <Button Icon={FunnelIcon} onClick={handleApplyFilters}>
+                Apply
+              </Button>
+            </div>
+          </section>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
           )}
+
+          <section className="grid gap-4 md:grid-cols-3">
+            {summaryCards.map((card) => (
+              <div key={card.label} className="bg-white rounded-2xl shadow-md p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">{card.label}</p>
+                  <p className={`text-3xl font-bold mt-2 ${card.colorClass}`}>{card.value.toLocaleString()} OMR</p>
+                </div>
+                <card.icon className={`${card.colorClass} h-10 w-10`} />
+              </div>
+            ))}
+          </section>
+
+          <section className="bg-white rounded-2xl shadow-md p-4 md:p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold" style={{ color: BRAND_COLORS.NAVY }}>
+                  Transactions in Period
+                </h2>
+                <p className="text-sm text-gray-500">Live data from Cloud Run</p>
+              </div>
+              {loading && <span className="text-sm text-gray-500">Loading...</span>}
+            </div>
+            {summary && summary.transactions.length === 0 && !loading ? (
+              <p className="text-gray-600">No transactions were recorded during this period.</p>
+            ) : (
+              <div className="space-y-3">
+                {summary?.transactions.map((tx) => (
+                  <div key={tx.id} className="border border-gray-100 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-gray-500">{tx.date}</p>
+                      <p className="text-lg font-semibold" style={{ color: BRAND_COLORS.NAVY }}>
+                        {tx.description || tx.company}
+                      </p>
+                      <p className="text-sm text-gray-500">{tx.company} · {tx.category}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge variant={tx.type === 'In' ? 'success' : 'danger'} Icon={tx.type === 'In' ? ArrowUpIcon : ArrowDownIcon}>
+                        {tx.type === 'In' ? 'Inflow' : 'Outflow'}
+                      </Badge>
+                      <p
+                        className={`text-lg font-bold ${tx.type === 'In' ? 'text-tajheez-green' : 'text-tajheez-red'}`}
+                      >
+                        {tx.type === 'In' ? '+' : '-'} {tx.amount.toLocaleString()} OMR
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
+      </div>
     </Layout>
   );
 }

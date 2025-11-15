@@ -1,0 +1,86 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "TAJHEEZ" [level=2] [ref=e4]
+      - navigation [ref=e5]:
+        - list [ref=e6]:
+          - listitem [ref=e7]:
+            - link "Dashboard" [ref=e8] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e9]
+              - generic [ref=e11]: Dashboard
+          - listitem [ref=e12]:
+            - link "Transactions" [ref=e13] [cursor=pointer]:
+              - /url: /transactions
+              - img [ref=e14]
+              - generic [ref=e16]: Transactions
+          - listitem [ref=e17]:
+            - link "Approvals" [ref=e18] [cursor=pointer]:
+              - /url: /approvals
+              - img [ref=e19]
+              - generic [ref=e21]: Approvals
+          - listitem [ref=e22]:
+            - link "Reports" [ref=e23] [cursor=pointer]:
+              - /url: /reports
+              - img [ref=e24]
+              - generic [ref=e27]: Reports
+          - listitem [ref=e28]:
+            - link "Profile" [ref=e29] [cursor=pointer]:
+              - /url: /profile
+              - img [ref=e30]
+              - generic [ref=e32]: Profile
+    - main [ref=e33]:
+      - heading "Add New Transaction" [level=1] [ref=e34]
+      - generic [ref=e35]:
+        - alert [ref=e36]: Failed to load form data. Please refresh the page.
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e39]: From Party
+            - generic [ref=e40]:
+              - img
+              - combobox "From Party" [ref=e41]:
+                - option "Select From Party" [selected]
+          - generic [ref=e42]:
+            - generic [ref=e43]: To Party
+            - generic [ref=e44]:
+              - img
+              - combobox "To Party" [ref=e45]:
+                - option "Select To Party" [selected]
+          - generic [ref=e46]:
+            - generic [ref=e47]: Category
+            - generic [ref=e48]:
+              - img
+              - combobox "Category" [ref=e49]:
+                - option "Select Category" [selected]
+          - generic [ref=e50]:
+            - generic [ref=e51]: Amount
+            - generic [ref=e52]:
+              - img [ref=e53]
+              - spinbutton "Amount" [ref=e55]: "0"
+          - generic [ref=e56]:
+            - generic [ref=e57]: Payment Method
+            - generic [ref=e58]:
+              - img
+              - combobox "Payment Method" [ref=e59]:
+                - option "Select Payment Method" [selected]
+          - generic [ref=e60]:
+            - generic [ref=e61]: Date
+            - generic [ref=e62]:
+              - img [ref=e63]
+              - textbox "Date" [ref=e65]
+          - generic [ref=e66]:
+            - generic [ref=e67]: Attachment
+            - generic [ref=e68]:
+              - img [ref=e69]
+              - button "Attachment" [ref=e71]
+          - generic [ref=e72]:
+            - generic [ref=e73]: Description
+            - textbox "Description" [ref=e74]
+          - button "Add Transaction" [ref=e76]:
+            - img [ref=e77]
+            - generic [ref=e79]: Add Transaction
+  - alert [ref=e80]
+```

@@ -1,111 +1,249 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
+import TajheezHeader from '@/components/TajheezHeader';
+import { BRAND_COLORS } from '@/lib/theme/brand';
+import {
+  getPendingApprovals,
+  approveTransaction as approvePendingTransaction,
+  rejectTransaction as rejectPendingTransaction,
+} from '@/lib/api/approvals';
+import type { TransactionRecord } from '@/lib/api/transactions';
 import { CheckIcon, XMarkIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { CheckCircle, Clock, ShieldAlert } from 'lucide-react';
 
+const USER_ID = 1;
 
 export default function ApprovalsPage() {
-  const [pendingTransactions, setPendingTransactions] = useState([
-    { id: 1, company: 'ABC Corp', amount: 1200, date: '2023-10-26', category: 'Software', description: 'Software license renewal' },
-    { id: 2, company: 'XYZ Ltd', amount: 500, date: '2023-10-25', category: 'Hardware', description: 'New keyboard and mouse' },
-    { id: 3, company: 'Global Solutions', amount: 3000, date: '2023-10-24', category: 'Services', description: 'Consulting services for Q4' },
-  ]);
+  const [pendingTransactions, setPendingTransactions] = useState<TransactionRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionId, setActionId] = useState<number | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
   const [rejectionComment, setRejectionComment] = useState('');
 
-  const handleApprove = (id: number) => {
-    console.log(`Transaction ${id} approved.`);
-    setPendingTransactions(pendingTransactions.filter(tx => tx.id !== id));
-    // In a real app, this would involve an API call
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    getPendingApprovals()
+      .then((data) => {
+        if (isMounted) {
+          setPendingTransactions(data);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Unable to load approvals');
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const summaryCards = useMemo(
+    () => [
+      { label: 'Pending Actions', value: pendingTransactions.length, icon: Clock, color: BRAND_COLORS.STATUS.SUBMITTED },
+      {
+        label: 'High Priority',
+        value: pendingTransactions.filter((tx) => tx.amount >= 10000).length,
+        icon: ShieldAlert,
+        color: BRAND_COLORS.STATUS.REJECTED,
+      },
+      { label: 'Ready to Approve', value: pendingTransactions.length, icon: CheckCircle, color: BRAND_COLORS.STATUS.APPROVED },
+    ],
+    [pendingTransactions]
+  );
+
+  const closeRejectModal = () => {
+    setShowRejectModal(false);
+    setSelectedTransactionId(null);
+    setRejectionComment('');
+  };
+
+  const handleApprove = async (id: number) => {
+    setActionError(null);
+    setActionId(id);
+    try {
+      await approvePendingTransaction(id, USER_ID);
+      setPendingTransactions((prev) => prev.filter((tx) => tx.id !== id));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to approve transaction';
+      setActionError(message);
+    } finally {
+      setActionId(null);
+    }
   };
 
   const handleRejectClick = (id: number) => {
     setSelectedTransactionId(id);
     setShowRejectModal(true);
+    setActionError(null);
+    setRejectionComment('');
   };
 
-  const handleRejectSubmit = () => {
-    if (selectedTransactionId !== null && rejectionComment.trim() !== '') {
-      console.log(`Transaction ${selectedTransactionId} rejected with comment: "${rejectionComment}"`);
-      setPendingTransactions(pendingTransactions.filter(tx => tx.id !== selectedTransactionId));
-      // In a real app, this would involve an API call
-      setShowRejectModal(false);
-      setRejectionComment('');
-      setSelectedTransactionId(null);
-    } else {
-      alert('Rejection comment is required.');
+  const handleRejectSubmit = async () => {
+    if (!selectedTransactionId) return;
+    if (!rejectionComment.trim()) {
+      setActionError('Rejection comment is required.');
+      return;
+    }
+    setActionError(null);
+    setActionId(selectedTransactionId);
+    try {
+      await rejectPendingTransaction(selectedTransactionId, USER_ID, rejectionComment.trim());
+      setPendingTransactions((prev) => prev.filter((tx) => tx.id !== selectedTransactionId));
+      closeRejectModal();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to reject transaction';
+      setActionError(message);
+    } finally {
+      setActionId(null);
     }
   };
 
-  return (
-    <Layout>
-        <h1 className="text-3xl font-bold text-tajheez-dark-navy mb-8">Pending Approvals</h1>
+  const renderTransactionCard = (transaction: TransactionRecord) => {
+    const statusColor =
+      transaction.statusVariant === 'success'
+        ? BRAND_COLORS.STATUS.APPROVED
+        : transaction.statusVariant === 'danger'
+        ? BRAND_COLORS.STATUS.REJECTED
+        : BRAND_COLORS.STATUS.SUBMITTED;
+    const isProcessing = actionId === transaction.id;
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          {pendingTransactions.length === 0 ? (
-            <p className="text-gray-600">No pending transactions for approval.</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {pendingTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border rounded-lg shadow-sm hover:bg-gray-50 transition duration-200">
-                  <div className="mb-2 md:mb-0">
-                    <p className="text-lg font-semibold text-gray-800">{transaction.company} - ${transaction.amount}</p>
-                    <p className="text-sm text-gray-600">{transaction.category} | {transaction.date}</p>
-                    <p className="text-sm text-gray-500">{transaction.description}</p>
+    return (
+      <div key={transaction.id} className="bg-white rounded-2xl shadow-md p-4 border border-gray-100 space-y-3">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-500">{transaction.date}</p>
+            <h3 className="text-lg font-semibold mt-1" style={{ color: BRAND_COLORS.NAVY }}>
+              {transaction.company}
+            </h3>
+            <p className="text-sm text-gray-500">{transaction.category}</p>
+          </div>
+          <div className="text-right">
+            <p
+              className="text-xl font-bold"
+              style={{ color: transaction.type === 'In' ? BRAND_COLORS.STATUS.APPROVED : BRAND_COLORS.STATUS.REJECTED }}
+            >
+              {transaction.type === 'In' ? '+' : '-'} {transaction.amount.toLocaleString()} OMR
+            </p>
+            <p className="text-xs text-gray-500">Workflow Status</p>
+          </div>
+        </div>
+        {transaction.description && <p className="text-sm text-gray-600">{transaction.description}</p>}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-gray-100">
+          <span
+            className="text-xs font-semibold px-3 py-1 rounded-full text-white"
+            style={{ backgroundColor: statusColor }}
+          >
+            {transaction.status}
+          </span>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => handleApprove(transaction.id)}
+              variant="primary"
+              Icon={CheckIcon}
+              disabled={isProcessing}
+              className="text-sm"
+            >
+              {isProcessing ? 'Processing...' : 'Approve'}
+            </Button>
+            <Button
+              onClick={() => handleRejectClick(transaction.id)}
+              variant="danger"
+              Icon={XMarkIcon}
+              disabled={isProcessing}
+              className="text-sm"
+            >
+              Reject
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <Layout mainClassName="p-0">
+      <div className="min-h-screen" style={{ backgroundColor: BRAND_COLORS.BG_LIGHT }}>
+        <TajheezHeader title="Approvals" subtitle="Workflow" />
+        <div className="p-4 pt-6 pb-24 md:px-8 space-y-6">
+          <section className="grid gap-4 md:grid-cols-3">
+            {summaryCards.map((card) => (
+              <div key={card.label} className="rounded-2xl p-4 shadow-md text-white" style={{ backgroundColor: card.color }}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide opacity-80">{card.label}</p>
+                    <p className="text-3xl font-bold mt-2">{card.value}</p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleApprove(transaction.id)}
-                      variant="primary" // Assuming green is primary for approve
-                      Icon={CheckIcon}
-                      className="text-sm"
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      onClick={() => handleRejectClick(transaction.id)}
-                      variant="danger"
-                      Icon={XMarkIcon}
-                      className="text-sm"
-                    >
-                      Reject
-                    </Button>
-                  </div>
+                  <card.icon size={32} className="opacity-80" />
                 </div>
-              ))}
+              </div>
+            ))}
+          </section>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
             </div>
           )}
-        </div>
+          {actionError && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
+              {actionError}
+            </div>
+          )}
 
-        {/* Reject Modal */}
-        <Modal
-          isOpen={showRejectModal}
-          onClose={() => setShowRejectModal(false)}
-          title="Reject Transaction"
-          footer={
-            <>
-              <Button variant="secondary" onClick={() => setShowRejectModal(false)} Icon={ArrowUturnLeftIcon}>
-                Cancel
-              </Button>
-              <Button variant="danger" onClick={handleRejectSubmit} Icon={XMarkIcon}>
-                Confirm Reject
-              </Button>
-            </>
-          }
-        >
-          <p className="mb-4">Please provide a reason for rejecting transaction #{selectedTransactionId}:</p>
-          <textarea
-            className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-tajheez-red"
-            rows={4}
-            value={rejectionComment}
-            onChange={(e) => setRejectionComment(e.target.value)}
-            placeholder="Enter rejection reason..."
-          ></textarea>
-        </Modal>
+          <section className="space-y-4" data-testid="approvals-list">
+            <h2 className="text-xl font-semibold" style={{ color: BRAND_COLORS.NAVY }}>
+              Pending Transactions
+            </h2>
+            {loading ? (
+              <p className="text-gray-600">Loading approvals...</p>
+            ) : pendingTransactions.length === 0 ? (
+              <div className="bg-white rounded-2xl p-6 text-center shadow">
+                <p className="text-gray-600">No transactions are awaiting your approval.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingTransactions.map((transaction) => renderTransactionCard(transaction))}
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
+      <Modal
+        isOpen={showRejectModal}
+        onClose={closeRejectModal}
+        title={`Reject Transaction #${selectedTransactionId ?? ''}`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeRejectModal} Icon={ArrowUturnLeftIcon}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleRejectSubmit} Icon={XMarkIcon} disabled={actionId === selectedTransactionId}>
+              {actionId === selectedTransactionId ? 'Submitting...' : 'Confirm Reject'}
+            </Button>
+          </>
+        }
+      >
+        <p className="mb-4">Please provide a reason for rejecting this transaction:</p>
+        <textarea
+          className="w-full p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-tajheez-red"
+          rows={4}
+          value={rejectionComment}
+          onChange={(e) => setRejectionComment(e.target.value)}
+          placeholder="Enter rejection reason..."
+        />
+      </Modal>
     </Layout>
   );
 }

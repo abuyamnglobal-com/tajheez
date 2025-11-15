@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '@/components/Layout';
+import { BRAND_COLORS } from '@/lib/theme/brand';
 import {
   ChevronLeft,
   Plus,
@@ -11,18 +12,6 @@ import {
   Trash2,
   DollarSign,
 } from 'lucide-react';
-
-const BRAND_COLORS = {
-  NAVY: '#101F3B',
-  ORANGE: '#FF8C00',
-  BG_LIGHT: '#F7F8F9',
-  STATUS: {
-    APPROVED: '#10B981',
-    SUBMITTED: '#FF8C00',
-    REJECTED: '#EF4444',
-    DRAFT: '#6B7280',
-  },
-};
 
 const KPIS = [
   { title: 'Total In', value: '15,450 OMR', color: BRAND_COLORS.STATUS.APPROVED, icon: Plus },
@@ -67,7 +56,8 @@ const KpiCard = ({ title, value, color, icon: Icon, valueColor = 'white' }: KpiP
 );
 
 const TransactionCard = ({ data }: { data: typeof MOCK_TRANSACTIONS[number] }) => {
-  const statusColor = BRAND_COLORS.STATUS[data.status] || BRAND_COLORS.STATUS.DRAFT;
+  const statusColor =
+    BRAND_COLORS.STATUS[data.status as keyof typeof BRAND_COLORS.STATUS] || BRAND_COLORS.STATUS.DRAFT;
   const isPending = data.status === 'SUBMITTED';
 
   return (
