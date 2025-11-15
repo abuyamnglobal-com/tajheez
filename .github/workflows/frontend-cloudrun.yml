@@ -1,5 +1,9 @@
 name: Deploy Frontend to Cloud Run
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   push:
     branches:
