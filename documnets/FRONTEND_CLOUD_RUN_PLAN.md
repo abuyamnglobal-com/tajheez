@@ -7,7 +7,7 @@ This plan describes how to deploy the Next.js frontend (located in `frontend/`) 
 | Item | Notes |
 | --- | --- |
 | GCP Project | e.g., `yamn-cc` |
-| Artifact Registry repo | e.g., `us-central1-docker.pkg.dev/yamn-cc/cloud-run-source-deploy/tajheez-frontend` |
+| Artifact Registry repo | `us-central1-docker.pkg.dev/yamn-cc/partnership-finance-repo` (existing DOCKER repo). Create a dedicated `tajheez-frontend` repo if we want to isolate images; otherwise reuse this one. |
 | Cloud Run enabled | `gcloud services enable run.googleapis.com` |
 | Cloud Build enabled | optional but recommended |
 | Domain | e.g., `app.tajheez.com` (optional custom domain) |
@@ -71,9 +71,9 @@ Follow the DNS instructions Cloud Run outputs.
 
 ## 5. CI/CD Strategy
 
-1. **Build step**: Reuse the existing GitHub workflow (backend) or add `.github/workflows/frontend-cloudrun.yml` that runs `npm ci && npm run build && gcloud builds submit`.
-2. **Deploy step**: After pushing the image, run `gcloud run deploy ...` with Workload Identity Federation (same pattern as backend).
-3. **Secrets**: Store `GOOGLE_PROJECT_ID`, `GCP_REGION`, `CLOUD_RUN_SERVICE`, `ARTIFACT_REPO`, and `NEXT_PUBLIC_API_BASE_URL` in GitHub Actions secrets.
+1. **Build step**: `.github/workflows/frontend-cloudrun.yml` (new) runs `npm ci`, `npm run lint`, `npm run build`, then builds/pushes a Docker image to Artifact Registry.
+2. **Deploy step**: The same workflow runs `gcloud run deploy` with Workload Identity Federation (mirrors backend pipeline).
+3. **Secrets**: `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_ARTIFACT_REPO`, `GCP_FRONTEND_SERVICE`, `WORKLOAD_IDENTITY_PROVIDER`, `SERVICE_ACCOUNT_EMAIL`, `NEXT_PUBLIC_API_BASE_URL`.
 
 ## 6. Validation Checklist
 
@@ -101,8 +101,8 @@ Please review and confirm before kicking off the migration:
 
 - [x] Validate that the documented changes (Dockerfile, Next.js config, env vars) match the current state of `main`.
   - **Validation Note:** The `frontend/Dockerfile` is suitable for Cloud Run. The `frontend/next.config.ts` uses `output: 'standalone'` and has no conflicting settings. `NEXT_PUBLIC_API_BASE_URL` is correctly used in `frontend/lib/api/client.ts`. `NODE_ENV` is a standard Next.js variable. From a code and configuration perspective, the `main` branch is ready for Cloud Run deployment.
-- [ ] Confirm the Artifact Registry repo and Cloud Run service names/regions in this plan align with our GCP project. Please update this file with the exact repo/service names you’ll use.
-  - **Agent Note:** I cannot perform this action as I do not have access to your GCP project to confirm resource names and regions. This requires manual verification by a human with appropriate access.
+- [x] Confirm the Artifact Registry repo and Cloud Run service names/regions in this plan align with our GCP project. Please update this file with the exact repo/service names you’ll use.
+  - **Validation:** `gcloud artifacts repositories list --location=us-central1` shows `partnership-finance-repo` (DOCKER) in `us-central1`. We can reuse this repo or create a `tajheez-frontend` sub-repo if needed. Cloud Run service name is still planned as `partnership-frontend` in `us-central1`.
 - [ ] Double-check that removing Vercel won’t impact existing integrations (DNS, webhooks, analytics). Document any dependencies or confirm that none exist.
   - **Agent Note:** I cannot perform this action as I have no information about your existing integrations with Vercel. This requires manual investigation and documentation by a human.
 - [ ] Once the above are confirmed, execute the plan: provision the Artifact Registry (if missing), set up service accounts/secrets, and wire a GitHub Action or manual script to build and deploy to Cloud Run. Note the commit/PR you use for tracking.

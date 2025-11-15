@@ -49,30 +49,33 @@ Shut down the background proxy process after testing to free the port (`kill %<j
 
 When exposing the Express API to Vercel or other clients, set `ALLOWED_ORIGINS` in the backend `.env` (comma-separated list, e.g., `https://tajheez.vercel.app,https://staging-tajheez.vercel.app`). The server now enforces this list through `cors()` so Cloud Run stays locked down while still allowing local origins (empty variable) for development.
 
-## Frontend deployment (Vercel)
+## Frontend deployment (Cloud Run)
 
-Pushes to `main` run `.github/workflows/frontend-vercel.yml`, which:
+Pushes to `main` run `.github/workflows/frontend-cloudrun.yml`, which:
 - installs dependencies in `frontend/`,
-- runs `npm run lint` and `npm run build`, and
-- deploys the prebuilt output to Vercel production.
+- runs `npm run lint` and `npm run build`,
+- builds a Docker image and pushes it to Artifact Registry, and
+- deploys the image to Cloud Run (`$GCP_FRONTEND_SERVICE`).
 
-To keep the workflow green you must populate these GitHub Action secrets with the values from your Vercel project:
+Populate these GitHub Action secrets before merging:
 
 | Secret | Purpose |
 | --- | --- |
-| `VERCEL_TOKEN` | Personal/token-based access for the CLI |
-| `VERCEL_ORG_ID` | Organization scope returned by `vercel link` |
-| `VERCEL_PROJECT_ID` | Project identifier returned by `vercel link` |
-
-Locally, run `npx vercel link` inside `frontend/` to verify the project binding and `npx vercel env pull` if you need the same environment variables for previews or smoke testing.
+| `GCP_PROJECT_ID` | GCP project (e.g., `yamn-cc`) |
+| `GCP_REGION` | Cloud Run region (e.g., `us-central1`) |
+| `GCP_ARTIFACT_REPO` | Artifact Registry repo name (e.g., `partnership-finance-repo`) |
+| `GCP_FRONTEND_SERVICE` | Cloud Run service name (e.g., `partnership-frontend`) |
+| `WORKLOAD_IDENTITY_PROVIDER` | WIF provider for GitHub Actions |
+| `SERVICE_ACCOUNT_EMAIL` | Deploy service account email |
+| `NEXT_PUBLIC_API_BASE_URL` | Backend API base URL exposed to the frontend |
 
 ### Frontend ↔ Backend linking
 
-Set `NEXT_PUBLIC_API_BASE_URL` (both in `.env.local` and Vercel) to the HTTPS URL of the Google Cloud Run backend so the Next.js client points at the live API. The frontend HTTP client strips trailing slashes automatically, so provide the root (for example `https://partnership-finance-backend-xxxx.a.run.app`). Keep `ALLOWED_ORIGINS` in the backend `.env` aligned with the Vercel domain to avoid CORS rejections.
+Set `NEXT_PUBLIC_API_BASE_URL` (both in `.env.local` and Cloud Run env vars) to the HTTPS URL of the backend service. Keep `ALLOWED_ORIGINS` in the backend `.env` aligned with the Cloud Run frontend URL to avoid CORS issues.
 
 ### End-to-end tests
 
-The frontend now ships with Playwright smoke tests under `frontend/tests/e2e/`. Run them locally with:
+The frontend ships with Playwright smoke tests under `frontend/tests/e2e/`. Run them locally with:
 
 ```bash
 cd frontend
