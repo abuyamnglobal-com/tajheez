@@ -114,7 +114,7 @@ out
 *.suo
 *.ntvs*
 *.njsproj
-
+.vercel
 # Backend specific
 backend/node_modules
 backend/.env

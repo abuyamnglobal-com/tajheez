@@ -31,13 +31,4 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          cd frontend
-          npx vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
-          npx vercel build --prod --token "$VERCEL_TOKEN"
-          npx vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN"
+      # Deployment is handled by Vercel's Git integration; this workflow stops after checks.
