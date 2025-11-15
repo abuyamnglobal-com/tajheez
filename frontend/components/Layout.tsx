@@ -3,13 +3,14 @@ import Sidebar from './Sidebar';
 
 interface LayoutProps {
   children: React.ReactNode;
+  mainClassName?: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children, mainClassName }) => {
   return (
     <div className="min-h-screen bg-white flex">
       <Sidebar />
-      <main className="flex-1 p-4 sm:p-6 md:p-8">
+      <main className={`flex-1 ${mainClassName || 'p-4 sm:p-6 md:p-8'}`}>
         {children}
       </main>
     </div>
