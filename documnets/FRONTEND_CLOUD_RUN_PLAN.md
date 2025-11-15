@@ -101,7 +101,11 @@ Please review and confirm before kicking off the migration:
 
 - [x] Validate that the documented changes (Dockerfile, Next.js config, env vars) match the current state of `main`.
   - **Validation Note:** The `frontend/Dockerfile` is suitable for Cloud Run. The `frontend/next.config.ts` uses `output: 'standalone'` and has no conflicting settings. `NEXT_PUBLIC_API_BASE_URL` is correctly used in `frontend/lib/api/client.ts`. `NODE_ENV` is a standard Next.js variable. From a code and configuration perspective, the `main` branch is ready for Cloud Run deployment.
-- [ ] Confirm the Artifact Registry repo and Cloud Run service names/regions in this plan align with our GCP project.
-- [ ] Double-check that removing Vercel won’t impact existing integrations (e.g., DNS, webhooks, analytics). Call out any gaps.
-- [ ] If everything looks good, start executing the plan: create the Artifact Registry (if missing), set up service accounts/secrets, and wire a GitHub Action or manual script to build and deploy to Cloud Run.
-- [ ] Report back any blockers or additional requirements so we can adjust the plan without breaking the deployment pipeline.
+- [ ] Confirm the Artifact Registry repo and Cloud Run service names/regions in this plan align with our GCP project. Please update this file with the exact repo/service names you’ll use.
+  - **Agent Note:** I cannot perform this action as I do not have access to your GCP project to confirm resource names and regions. This requires manual verification by a human with appropriate access.
+- [ ] Double-check that removing Vercel won’t impact existing integrations (DNS, webhooks, analytics). Document any dependencies or confirm that none exist.
+  - **Agent Note:** I cannot perform this action as I have no information about your existing integrations with Vercel. This requires manual investigation and documentation by a human.
+- [ ] Once the above are confirmed, execute the plan: provision the Artifact Registry (if missing), set up service accounts/secrets, and wire a GitHub Action or manual script to build and deploy to Cloud Run. Note the commit/PR you use for tracking.
+  - **Agent Note:** I cannot perform this action as it requires access to GCP and GitHub to create resources, set up secrets, and execute deployment scripts. This must be performed by a human with appropriate access and permissions.
+- [ ] Report back in this file (or linked ticket) with blockers, deployment outcomes, and any follow-up actions so we stay aligned.
+  - **Agent Note:** I cannot perform this action as it requires monitoring external systems and reporting on outcomes. This must be performed by a human.
