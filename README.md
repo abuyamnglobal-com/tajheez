@@ -6,6 +6,7 @@ Additional module-specific instructions:
 - `frontend/README.md` — default Next.js usage directions.
 - `documnets/API_Documentation.md` — REST contract summary.
 - `documnets/TAJHEEZ_Combined_Frontend_Developer_Document.md` — product and UI context.
+- `documnets/FRONTEND_CLOUD_RUN_PLAN.md` — plan for deploying the Next.js frontend to Google Cloud Run.
 
 Keep new documentation near related code and update the guides above whenever behavior or APIs change.
 
